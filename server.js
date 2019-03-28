@@ -6,6 +6,8 @@ const bodyParser = require('body-parser')
 const login = require('./routes/api/login')
 const article = require('./routes/api/article')
 const user = require('./routes/api/user')
+const report = require('./routes/api/report')
+const manage = require('./routes/api/manage')
 const jwtMiddleware = require('./config/jwt')
 
 mongoose.connect('mongodb://localhost:27017/sysuer_test', {useNewUrlParser: true,useCreateIndex: true,})
@@ -20,6 +22,8 @@ app.use('/api/login',login)
 app.use(jwtMiddleware)
 app.use('/api/article',article)
 app.use('/api/user',user)
+app.use('/api/report',report)
+app.use('/api/manage',manage)
 
 app.listen(5000,() => {
     console.log('服务端已开启')

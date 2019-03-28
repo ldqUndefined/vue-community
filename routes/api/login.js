@@ -63,7 +63,7 @@ router.post('/', (req,res) => {
                         birthday:user.birthday,
                         gender:user.gender,
                         selfDescription:user.selfDescription
-                    },keys.secretOrPrivateKey,{expiresIn:60})
+                    },keys.secretOrPrivateKey,{expiresIn:3600})
                     res.json({
                         statusCode:'0000',
                         description:'登陆成功',
@@ -113,6 +113,60 @@ router.post('/changepassword',(req,res) => {
                     })
                 }
             });
+        }
+    })
+})
+
+router.post('/managelogin',(req,res) => {
+    User.findOne({email:req.body.email}).then((user) => {   
+        if(user){//如果邮箱存在
+            bcrypt.compare(req.body.password, user.password).then((success) => {
+                if(success){//匹配成功
+                    if(user.identity === 1){
+                        res.json({
+                            statusCode:'9999',
+                            description:'你不是管理员'
+                        })
+                    }else{
+                        let returnUser = {
+                            _id:user._id,
+                            email:user.email,
+                            name:user.name,
+                            registerDate:user.registerDate,
+                            avatar:user.avatar,
+                            birthday:user.birthday,
+                            gender:user.gender,
+                            selfDescription:user.selfDescription
+                        }
+                        let token = jwt.sign({
+                            _id:user._id,
+                            email:user.email,
+                            name:user.name,
+                            registerDate:user.registerDate,
+                            avatar:user.avatar,
+                            birthday:user.birthday,
+                            gender:user.gender,
+                            selfDescription:user.selfDescription
+                        },keys.secretOrPrivateKey,{expiresIn:3600})
+                        res.json({
+                            statusCode:'0000',
+                            description:'登陆成功',
+                            returnUser,
+                            token
+                        })
+                    }
+                }else{//匹配失败
+                    res.json({
+                        statusCode:'9999',
+                        description:'密码错误'
+                    })
+                }
+            });
+        }else{//如果邮箱不存在
+            res.json({
+                statusCode:'9999',
+                description:'该邮箱不存在'
+            })
         }
     })
 })

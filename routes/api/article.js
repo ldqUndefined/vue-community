@@ -3,7 +3,7 @@ const router = express.Router()
 
 const Article = require('../../models/Article')
 const User = require('../../models/User')
-const Comment = require('../../models/Comment')
+const Comments = require('../../models/Comment')
 
 router.get('/',(req,res) => {//获取全部类型，skip一页几个，page第几页
     let page = parseInt(req.query.page) 
@@ -131,7 +131,7 @@ router.post('/delete/:id',(req,res) => {
 })
 
 router.post('/addcomment',(req,res) => {
-    let newComment = new Comment({
+    let newComment = new Comments({
         user:req.body.userId,
         article:req.body.articleId,
         content:req.body.content
@@ -159,7 +159,7 @@ router.post('/addcomment',(req,res) => {
 })
 
 router.post('/deletecomment',(req,res) => {
-    Comment.findByIdAndRemove(req.body.commentId).then((comment) => {
+    Comments.findByIdAndRemove(req.body.commentId).then((comment) => {
         Article.findByIdAndUpdate(comment.article,{$pull:{comments:comment._id}})
             .then((article) => {
                 User.findByIdAndUpdate(comment.user,{$pull:{comments:comment._id}})
