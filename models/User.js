@@ -48,6 +48,14 @@ const UserSchema = new Schema({
     comments:[{
         type: Schema.Types.ObjectId,
         ref: 'comment'
+    }],
+    follow:[{
+        type:Schema.Types.ObjectId,
+        ref:'user'
+    }],
+    fans:[{
+        type:Schema.Types.ObjectId,
+        ref:'user'
     }]
 })
 

@@ -52,7 +52,8 @@ router.post('/', (req,res) => {
                         avatar:user.avatar,
                         birthday:user.birthday,
                         gender:user.gender,
-                        selfDescription:user.selfDescription
+                        selfDescription:user.selfDescription,
+                        identity:user.identity
                     }
                     let token = jwt.sign({
                         _id:user._id,
@@ -62,7 +63,8 @@ router.post('/', (req,res) => {
                         avatar:user.avatar,
                         birthday:user.birthday,
                         gender:user.gender,
-                        selfDescription:user.selfDescription
+                        selfDescription:user.selfDescription,
+                        identity:user.identity
                     },keys.secretOrPrivateKey,{expiresIn:3600})
                     res.json({
                         statusCode:'0000',

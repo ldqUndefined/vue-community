@@ -113,8 +113,29 @@ router.get('/checkifname',(req,res) => {
         })
 })
 
+router.get('/myfollowlist',(req,res) => {
+    let page = parseInt(req.query.page) 
+    let num = parseInt(req.query.num)
+    let id = req.query.id
+    let totalFollow = 0
+    User.findById(id).then((user) => {
+        totalFollow = user.follow.length
+        User.findById(id)
+            .populate({path:'follow',select:'name avatar articles comments email selfDescription',options:{skip:page*(num-1),limit:page}})
+            .then((theuser) => {
+                res.json({
+                    statusCode:'0000',
+                    description:'获取当前页关注者成功',
+                    followList:theuser.follow,
+                    totalFollow
+                })
+            })
+    })
+    
+})
+
 router.get('/:id',(req,res) => {
-    User.findById(req.params.id,'name registerDate gender birthday email articles selfDescription avatar comments')
+    User.findById(req.params.id,'name registerDate gender birthday email articles selfDescription avatar comments fans')
     .populate([{
         path:'articles',
         select:'author browseNum title publishTime comments lastCommentAt articleType',
@@ -227,6 +248,73 @@ router.get('/current/:id',(req,res) => {
             console.log(err)
         })
 })
+
+router.post('/follow',(req,res) => {
+    let fan = req.body.fanId
+    let star = req.body.starId
+    User.findOne({_id:fan,follow:{$elemMatch:{$eq:star}}})
+        .then((has) => {
+            if(has){
+                res.json({
+                    statusCode:'9999',
+                    description:'已关注'
+                })
+            }else{
+                User.findByIdAndUpdate(fan,{$push:{follow:star}})
+                    .then((thefan) => {
+                        User.findByIdAndUpdate(star,{$push:{fans:fan}})
+                            .then((thestar) => {
+                                res.json({
+                                    statusCode:'0000',
+                                    description:'关注成功'
+                                })
+                            })
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                        res.json({
+                            statusCode:'9999',
+                            description:'关注失败'
+                        })
+                    })
+            }
+        })
+})
+
+router.post('/cancelfollow',(req,res) => {
+    let fan = req.body.fanId
+    let star = req.body.starId
+    User.findOne({_id:fan,follow:{$elemMatch:{$eq:star}}})
+        .then((has) => {
+            if(has){
+                User.findByIdAndUpdate(fan,{$pull:{follow:star}})
+                    .then((thefan) => {
+                        User.findByIdAndUpdate(star,{$pull:{fans:fan}})
+                            .then((thestar) => {
+                                res.json({
+                                    statusCode:'0000',
+                                    description:'取消关注成功'
+                                })
+                            })
+                    })
+            }else{
+                res.json({
+                    statusCode:'9999',
+                    description:'本来就没关注'
+                })
+            }
+        })
+        .catch((err) => {
+            console.log(err)
+            res.json({
+                statusCode:'9999',
+                description:'取消关注失败'
+            })
+        })
+})
+
+
+
 
 
 module.exports = router
